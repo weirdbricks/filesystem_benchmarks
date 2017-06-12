@@ -1,7 +1,43 @@
-df -hT /mnt/ext4/
+df -hT /media/; pg_test_fsync -f /media/test -s 5; echo -n ---FIO---; fio --randrepeat=1 --ioengine=libaio --gtod_reduce=1 --name=test --bs=4k --iodepth=64 --size=1G --readwrite=randrw --rwmixread=75 --filename /media/fiotest | egrep 'read|write' | grep -v stats
 Filesystem     Type  Size  Used Avail Use% Mounted on
-/dev/sda4      ext4   77G   53M   73G   1% /mnt/ext4
+/dev/sda4      ext4   77G   53M   73G   1% /media
+5 seconds per test
+O_DIRECT supported on this platform for open_datasync and open_sync.
 
-fio --randrepeat=1 --ioengine=libaio --gtod_reduce=1 --name=test --bs=4k --iodepth=64 --size=1G --readwrite=randrw --rwmixread=75 --filename /mnt/ext4/fiotest | egrep 'read|write' | grep -v stats
-  read : io=784996KB, bw=20512KB/s, iops=5128, runt= 38270msec
-  write: io=263580KB, bw=6887.4KB/s, iops=1721, runt= 38270msec
+Compare file sync methods using one 8kB write:
+(in wal_sync_method preference order, except fdatasync
+is Linux's default)
+        open_datasync                    1752.560 ops/sec
+        fdatasync                        1733.690 ops/sec
+        fsync                            1703.368 ops/sec
+        fsync_writethrough                            n/a
+        open_sync                        1718.815 ops/sec
+
+Compare file sync methods using two 8kB writes:
+(in wal_sync_method preference order, except fdatasync
+is Linux's default)
+        open_datasync                     864.032 ops/sec
+        fdatasync                         861.746 ops/sec
+        fsync                            1317.967 ops/sec
+        fsync_writethrough                            n/a
+        open_sync                        1263.742 ops/sec
+
+Compare open_sync with different write sizes:
+(This is designed to compare the cost of writing 16kB
+in different write open_sync sizes.)
+         1 * 16kB open_sync write        1290.340 ops/sec
+         2 *  8kB open_sync writes       1272.016 ops/sec
+         4 *  4kB open_sync writes       1112.269 ops/sec
+         8 *  2kB open_sync writes        143.562 ops/sec
+        16 *  1kB open_sync writes         54.749 ops/sec
+
+Test if fsync on non-write file descriptor is honored:
+(If the times are similar, fsync() can sync data written
+on a different descriptor.)
+        write, fsync, close              1730.154 ops/sec
+        write, close, fsync              1704.543 ops/sec
+
+Non-Sync'ed 8kB writes:
+        write                           92886.358 ops/sec
+---FIO---  read : io=784996KB, bw=20249KB/s, iops=5062, runt= 38767msec
+  write: io=263580KB, bw=6799.9KB/s, iops=1699, runt= 38767msec
