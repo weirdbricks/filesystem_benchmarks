@@ -1,3 +1,7 @@
+df -hT /mnt/jfs/
+Filesystem     Type  Size  Used Avail Use% Mounted on
+/dev/sda4      jfs    78G  1.1G   77G   2% /mnt/jfs
+
 fio --randrepeat=1 --ioengine=libaio --gtod_reduce=1 --name=test --bs=4k --iodepth=64 --size=1G --readwrite=randrw --rwmixread=75 --filename /mnt/jfs/fiotest | egrep 'read|write' | grep -v stats
   read : io=784996KB, bw=21615KB/s, iops=5403, runt= 36317msec
   write: io=263580KB, bw=7257.8KB/s, iops=1814, runt= 36317msec
