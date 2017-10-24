@@ -15,11 +15,30 @@ if [ $? != 0 ]; then
 	        echo "[  OK  ] - Package $1 is installed"
 	else
 		echo "[ FAIL ] - Something went wrong!"
+		exit 1
 	fi
 else 
 	echo "[  OK  ] - Package $1 is installed"
 fi
 }
+
+file="/etc/yum.repos.d/mongodb-org-3.4.repo"
+if ! [ -f "$file" ];then
+	echo "[ INFO ] - The file $file was not found. Adding..."
+printf '[mongodb-org-3.4]
+name=MongoDB Repository
+baseurl=https://repo.mongodb.org/yum/redhat/$releasever/mongodb-org/3.4/x86_64/
+gpgcheck=1
+enabled=1
+gpgkey=https://www.mongodb.org/static/pgp/server-3.4.asc\n' > $file
+        if [ $? != 0 ]; then
+                echo "[ FAIL ] - Something went wrong!"
+	else
+		echo "[  OK  ] - The file $file was added!"
+        fi
+else
+	echo "[  OK  ] - The file $file is in position!"
+fi
 
 add-package epel-release
 add-package xfsprogs
@@ -28,6 +47,20 @@ add-package postgresql-contrib
 add-package pigz
 add-package grub2-tools
 add-package grub2-tools-minimal
+add-package java-1.8.0-openjdk 
+add-package mongodb-org
+
+file="/etc/profile.d/jdk.sh"
+if ! [ -f "$file" ];then
+	echo "[  INFO  ] - Setting up the OpenJDK..."
+        java=`find /usr/lib/jvm/ja*/j* -maxdepth 0 -type d`
+        export JAVA_HOME=/usr/lib/jvm$java
+        echo "JAVA_HOME=/usr/lib/jvm$java" >> $file
+        export PATH=$PATH:$JAVA_HOME/bin/
+        echo "PATH=$PATH:$JAVA_HOME/bin/" >> $file
+else
+	echo "[  OK  ] - OpenJDK setup correctly!"
+fi
 
 grep GRUB_DISABLE_SUBMENU /etc/default/grub &>/dev/null 
 if [ $? != 0 ]; then
@@ -78,6 +111,7 @@ if [ $? != 0 ]; then
 else
 	echo "[  OK  ] - The JFS module is already loaded!"	
 fi	
+
 
 #df -hT /media
 #echo "--------------------pg_test_fsync--------------------"
