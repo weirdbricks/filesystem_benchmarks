@@ -3,7 +3,11 @@
 # a simple function to add packages using yum
 function add-package()
 {
-rpm -qa | grep -i $1 &>/dev/null
+if [ -z $2 ]; then
+  rpm -qa | grep -i $1 &>/dev/null
+else
+  rpm -qa | grep -i $2 &>/dev/null
+fi
 if [ $? != 0 ]; then	
 	echo "[ INFO ] - Package $1 is not installed. Installing..."
 	yum install $1 -y -q
@@ -36,7 +40,7 @@ if [ $? != 0 ]; then
 		exit 1
         fi
 else
-	echo "[ INFO ] - GRUB submenu already disabled!"	
+	echo "[  OK  ] - GRUB submenu already disabled!"	
 fi
 
 grub2-mkconfig -o /boot/grub/grub.cfg &>/dev/null
@@ -56,10 +60,24 @@ if [ $? != 0 ]; then
 	sleep 5
 	reboot now
 else
-	echo "[ INFO ] - Kernel version set to \"3.10.0-514\""
+	echo "[  OK  ] - Kernel version set to \"3.10.0-514\""
 fi
 
-#add-package http://www.elrepo.org/elrepo-release-7.0-3.el7.elrepo.noarch.rpm
+add-package http://www.elrepo.org/elrepo-release-7.0-3.el7.elrepo.noarch.rpm elrepo
+add-package kmod-jfs
+
+# check if jfs is already loaded
+lsmod | grep jfs &>/dev/null
+if [ $? != 0 ]; then
+	modprobe jfs
+	if [ $? != 0 ]; then
+		echo "[ FAIL ] - Something went wrong!"
+	else
+		echo "[  OK  ] - The JFS module is already loaded!"
+	fi
+else
+	echo "[  OK  ] - The JFS module is already loaded!"	
+fi	
 
 #df -hT /media
 #echo "--------------------pg_test_fsync--------------------"
