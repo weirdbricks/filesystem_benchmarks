@@ -45,6 +45,7 @@ add-package xfsprogs
 add-package fio
 add-package postgresql-contrib
 add-package pigz
+add-package lsof
 add-package grub2-tools
 add-package grub2-tools-minimal
 add-package java-1.8.0-openjdk 
