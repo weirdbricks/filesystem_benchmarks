@@ -63,8 +63,8 @@ mkfs.ext4 $volume -F
 # mount the volume
 mount $volume /media -v
 echo "---------------- Running EXT4 tests ----------------"
-mysql-test
-mongo-test
+#mysql-test
+#mongo-test
 echo "---------------- Preparing XFS tests ----------------"
 cd /
 umount /media
@@ -72,8 +72,8 @@ filesystem=xfs
 mkfs.xfs $volume -f
 mount $volume /media -v
 echo "---------------- Running XFS tests ----------------"
-mysql-test
-mongo-test
+#mysql-test
+#mongo-test
 echo "---------------- Preparing JFS tests (journal on same volume) ----------------"
 cd /
 umount /media
@@ -81,5 +81,15 @@ filesystem=jfs
 mkfs.jfs $volume -f
 mount $volume /media -v
 echo "---------------- Running JFS tests (journal on same volume) ----------------"
+#mysql-test
+#mongo-test
+echo "---------------- Preparing JFS tests (journal on separate volume) ----------------"
+volume2=`find /dev/mapper/v* | tail -n1`
+cd /
+umount /media
+filesystem=jfs-separate
+mkfs.jfs -j $volume $volume2 -f
+mount $volume /media -v
+echo "---------------- Running JFS tests (journal on separate volume) ----------------"
 mysql-test
 mongo-test
