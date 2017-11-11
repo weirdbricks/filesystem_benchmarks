@@ -28,20 +28,22 @@ function mysql-test()
 	systemctl stop mysqld
 }
 
-function mongo-test()
+function mongo-tests()
 {
-        benchmark=mongo
+        benchmark=mongo-ycsb
 	systemctl stop mongod
 	echo "preparing Mongo..."
 	mkdir -pv /media/mongo
 	chown -Rv mongod:mongod /media/mongo
-	benchmark=mongo
 	systemctl start mongod
 	mongo ycsb --eval "db.dropDatabase()"
 	cd /tmp/ycsb-0.12.0
 	./bin/ycsb load mongodb -s -P workloads/workloada -p recordcount=100000 -threads `nproc`
 	./bin/ycsb run mongodb-async -s -P workloads/workloada \
 	-p operationcount=100000 -threads `nproc` | egrep -i "runtime|throughput|return" | tee /root/$filesystem-$benchmark.txt
+	benchmark=mongo-perf
+	cd /tmp/mongo-perf-r20171009
+        time python benchrun.py -f testcases/simple_* -t `nproc` --trialTime 30 | tee /root/$filesystem-$benchmark.txt
 	systemctl stop mongod
 }
 
@@ -59,8 +61,18 @@ function mongo-perf-test()
 
 # get the volume id
 volume=`find /dev/mapper/v* | head -n1`
-echo "---------------- Preparing EXT4 ----------------"
 
+# make sure the volume isn't mounted to begin with
+lsblk -l -o NAME,MOUNTPOINT $volume | grep media
+if [ $? != 0 ]; then
+        echo "[ INFO ] - OK, the volume is not mounted"
+else
+        echo "[ INFO  ] - The volume is mounted - unmounting .."
+        cd /
+        umount /media
+fi
+
+echo "---------------- Preparing EXT4 ----------------"
 # format the volume with ext4
 filesystem=ext4
 mkfs.ext4 $volume -F
@@ -70,9 +82,8 @@ mount $volume /media -v
 
 echo "---------------- Running EXT4 tests ----------------"
 mysql-test
-mongo-test
+mongo-tests
 fio-test
-mongo-perf-test
 echo "bogooooooooon"
 exit 1
 
