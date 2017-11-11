@@ -1,5 +1,17 @@
 #!/bin/bash
 
+file="/etc/profile.d/jdk.sh"
+if ! [ -f "$file" ];then
+	echo "[  INFO  ] - Setting up the OpenJDK..."
+        java=`find /usr/lib/jvm/ja*/j* -maxdepth 0 -type d`
+        export JAVA_HOME=$java
+        echo "JAVA_HOME=$java" >> $file
+        export PATH=$PATH:$JAVA_HOME/bin/
+        echo "PATH=$PATH:$JAVA_HOME/bin/" >> $file
+else
+	echo "[  OK  ] - OpenJDK setup correctly!"
+fi
+
 function mysql-test()
 {
 	benchmark=mysql
