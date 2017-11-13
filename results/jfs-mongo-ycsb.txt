@@ -1,0 +1,4 @@
+[OVERALL], RunTime(ms), 6925.0
+[OVERALL], Throughput(ops/sec), 72202.16606498195
+[READ], Return=OK, 249520
+[UPDATE], Return=OK, 250480
