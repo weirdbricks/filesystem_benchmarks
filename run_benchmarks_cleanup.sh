@@ -73,13 +73,13 @@ function mongo-test()
 	systemctl start mongod &> $logfile
 	sleep 3
 	check-output
-	mongo ycsb --eval "db.dropDatabase()" &> $logfile
+	mongo ycsb --eval "db.dropDatabase()" 2> $logfile
 	check-output
 	cd /tmp/ycsb-0.12.0
-	./bin/ycsb load mongodb -s -P workloads/workloada -p recordcount=500000 -threads `nproc` &> $logfile
+	./bin/ycsb load mongodb -s -P workloads/workloada -p recordcount=500000 -threads `nproc` 2> $logfile
 	check-output
 	./bin/ycsb run mongodb-async -s -P workloads/workloada \
-	-p operationcount=500000 -threads `nproc` | egrep -i "runtime|throughput|return" &> /root/$filesystem-$benchmark.txt
+	-p operationcount=500000 -threads `nproc` | egrep -i "runtime|throughput|return" 2> /root/$filesystem-$benchmark.txt
 	systemctl stop mongod &> $logfile
 	check-output
 }
