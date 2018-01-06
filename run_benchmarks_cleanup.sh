@@ -22,7 +22,7 @@ function mysql-test()
 	echo "Starting MySQL..."
 	systemctl start mysqld
 	echo "Starting MySQL Slap..."
-	time mysqlslap --concurrency=`nproc` --iterations=10 --number-char-cols=20 \
+	time mysqlslap --concurrency=`nproc` --iterations=5 --number-char-cols=20 \
 	--number-int-cols=7 --auto-generate-sql --number-of-queries=5000 -v | tee /root/$filesystem-$benchmark.txt
 	echo "Stopping MySQL..."
 	systemctl stop mysqld
