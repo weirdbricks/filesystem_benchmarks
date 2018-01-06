@@ -72,13 +72,13 @@ function mongo-test()
 	systemctl start mongod &> $logfile
 	sleep 3
 	check-output
-	mongo ycsb --eval "db.dropDatabase()"
+	mongo ycsb --eval "db.dropDatabase()" &> $logfile
 	check-output
 	cd /tmp/ycsb-0.12.0
-	./bin/ycsb load mongodb -s -P workloads/workloada -p recordcount=500000 -threads `nproc`
+	./bin/ycsb load mongodb -s -P workloads/workloada -p recordcount=500000 -threads `nproc` &> $logfile
 	check-output
 	./bin/ycsb run mongodb-async -s -P workloads/workloada \
-	-p operationcount=500000 -threads `nproc` | egrep -i "runtime|throughput|return" > /root/$filesystem-$benchmark.txt
+	-p operationcount=500000 -threads `nproc` | egrep -i "runtime|throughput|return" &> /root/$filesystem-$benchmark.txt
 	systemctl stop mongod &> $logfile
 	check-output
 }
@@ -87,7 +87,7 @@ function fio-test()
 {
 	echo "Starting FIO test..."
 	benchmark=fio
-	fio --randrepeat=1 --ioengine=libaio --gtod_reduce=1 --name=test --bs=4k --iodepth=64 --size=2G --readwrite=randrw --rwmixread=75 --filename /media/fiotest | grep iops > /root/$filesystem-$benchmark.txt
+	fio --randrepeat=1 --ioengine=libaio --gtod_reduce=1 --name=test --bs=4k --iodepth=64 --size=2G --readwrite=randrw --rwmixread=75 --filename /media/fiotest | grep iops &> /root/$filesystem-$benchmark.txt
 	check-output
 }
 
