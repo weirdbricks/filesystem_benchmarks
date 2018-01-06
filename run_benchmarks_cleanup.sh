@@ -13,6 +13,23 @@ else
 	echo "[  OK  ] - OpenJDK setup correctly!"
 fi
 
+# function to check if a file exists
+check_if_file_exists () {
+        if [ ! -f $1 ]; then
+                echo "The file $1 does not exist - exiting"
+                exit 1
+        fi
+}
+
+# run sanity checks before we start
+check_if_file_exists /tmp/ycsb-0.12.0/bin/ycsb
+check_if_file_exists /usr/sbin/mysqld
+check_if_file_exists /usr/bin/mysqlslap
+check_if_file_exists /usr/bin/fio
+check_if_file_exists /usr/bin/mongod
+check_if_file_exists /usr/sbin/mkfs.jfs
+check_if_file_exists /usr/sbin/mkfs.xfs
+
 function check-output()
 {
 	if [ $? != 0 ]; then
