@@ -36,6 +36,7 @@ function check-output()
 {
 	if [ $? != 0 ]; then
 		printf "FAIL!!!!\n"
+		exit 1
 	fi
 }
 
@@ -100,6 +101,7 @@ else
         echo "[ INFO  ] - The volume is mounted - unmounting .."
         cd /
         umount /media
+	check-output
 fi
 
 echo "---------------- Preparing EXT4 ----------------"
