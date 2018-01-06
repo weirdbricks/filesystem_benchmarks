@@ -113,7 +113,10 @@ echo "---------------- Preparing EXT4 ----------------"
 # format the volume with ext4
 filesystem=ext4
 mkfs.ext4 $volume -F &> $logfile
+check-output
 mount $volume /media &> $logfile
+check-output
+echo "[  OK  ] - EXT4 ready"
 
 echo "---------------- Running EXT4 tests ----------------"
 mysql-test
@@ -123,9 +126,13 @@ fio-test
 echo "---------------- Preparing XFS tests ----------------"
 cd /
 umount /media
+check-output
 filesystem=xfs
 mkfs.xfs $volume -f &> $logfile
+check-output
 mount $volume /media &> $logfile
+check-output
+echo "[  OK  ] - XFS ready"
 
 echo "---------------- Running XFS tests ----------------"
 mysql-test
@@ -135,11 +142,17 @@ fio-test
 echo "---------------- Preparing JFS tests ----------------"
 cd /
 umount /media
+check-output
 filesystem=jfs
 mkfs.jfs $volume -f &> $logfile
+check-output
 mount $volume /media &> $logfile
+check-output
+echo "[  OK  ] - JFS ready"
 
 echo "---------------- Running JFS tests ----------------"
 mysql-test
 mongo-test
 fio-test
+
+echo "---------------- TESTS COMPLETE ----------------"
