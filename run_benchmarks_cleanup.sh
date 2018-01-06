@@ -29,6 +29,7 @@ check_if_file_exists /usr/bin/fio
 check_if_file_exists /usr/bin/mongod
 check_if_file_exists /usr/sbin/mkfs.jfs
 check_if_file_exists /usr/sbin/mkfs.xfs
+check_if_file_exists /usr/sbin/iotop
 
 echo "[ INFO ] - Using logfile $logfile."
 
