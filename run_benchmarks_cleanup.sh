@@ -70,6 +70,7 @@ function mongo-test()
 	mkdir -p /media/mongo
 	chown -R mongod:mongod /media/mongo
 	systemctl start mongod &> $logfile
+	sleep 3
 	check-output
 	mongo ycsb --eval "db.dropDatabase()"
 	check-output
