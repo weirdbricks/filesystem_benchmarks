@@ -30,6 +30,8 @@ check_if_file_exists /usr/bin/mongod
 check_if_file_exists /usr/sbin/mkfs.jfs
 check_if_file_exists /usr/sbin/mkfs.xfs
 
+echo "[ INFO ] - Using logfile $logfile."
+
 function check-output()
 {
 	if [ $? != 0 ]; then
@@ -48,25 +50,25 @@ function mysql-test()
 	chown -R mysql:mysql /media/mysql
 	check-output
 	echo "Starting MySQL..."
-	systemctl start mysqld &> /dev/null
+	systemctl start mysqld &> $logfile
 	check-output
 	echo "Starting MySQL Slap..."
 	time mysqlslap --concurrency=`nproc` --iterations=5 --number-char-cols=20 \
 	--number-int-cols=7 --auto-generate-sql --number-of-queries=5000 -v > /root/$filesystem-$benchmark.txt
 	check-output
 	echo "Stopping MySQL..."
-	systemctl stop mysqld &> /dev/null
+	systemctl stop mysqld &> $logfile
 	check-output
 }
 
 function mongo-test()
 {
         benchmark=mongo-ycsb
-	systemctl stop mongod &> /dev/null
+	systemctl stop mongod &> $logfile
 	echo "preparing Mongo..."
 	mkdir -p /media/mongo
 	chown -R mongod:mongod /media/mongo
-	systemctl start mongod &> /dev/null
+	systemctl start mongod &> $logfile
 	check-output
 	mongo ycsb --eval "db.dropDatabase()"
 	check-output
@@ -75,7 +77,7 @@ function mongo-test()
 	check-output
 	./bin/ycsb run mongodb-async -s -P workloads/workloada \
 	-p operationcount=500000 -threads `nproc` | egrep -i "runtime|throughput|return" > /root/$filesystem-$benchmark.txt
-	systemctl stop mongod &> /dev/null
+	systemctl stop mongod &> $logfile
 	check-output
 }
 
@@ -103,10 +105,8 @@ fi
 echo "---------------- Preparing EXT4 ----------------"
 # format the volume with ext4
 filesystem=ext4
-mkfs.ext4 $volume -F &> /dev/null
-
-# mount the volume with ext4
-mount $volume /media 
+mkfs.ext4 $volume -F &> $logfile
+mount $volume /media &> $logfile
 
 echo "---------------- Running EXT4 tests ----------------"
 mysql-test
@@ -117,8 +117,8 @@ echo "---------------- Preparing XFS tests ----------------"
 cd /
 umount /media
 filesystem=xfs
-mkfs.xfs $volume -f &> /dev/null
-mount $volume /media
+mkfs.xfs $volume -f &> $logfile
+mount $volume /media &> $logfile
 
 echo "---------------- Running XFS tests ----------------"
 mysql-test
@@ -129,8 +129,8 @@ echo "---------------- Preparing JFS tests ----------------"
 cd /
 umount /media
 filesystem=jfs
-mkfs.jfs $volume -f
-mount $volume /media 
+mkfs.jfs $volume -f &> $logfile
+mount $volume /media &> $logfile
 
 echo "---------------- Running JFS tests ----------------"
 mysql-test
