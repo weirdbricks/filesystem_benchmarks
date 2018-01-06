@@ -92,7 +92,7 @@ function fio-test()
 }
 
 # get the volume id
-volume=`find /dev/mapper/v* | head -n1`
+volume=`find /dev/mapper/v* | head -n1` &> $logfile
 
 # make sure the volume isn't mounted to begin with
 lsblk -l -o NAME,MOUNTPOINT $volume | grep media
@@ -101,6 +101,10 @@ if [ $? != 0 ]; then
 else
         echo "[ INFO  ] - The volume is mounted - unmounting .."
         cd /
+	systemctl stop mysqld &> $logfile
+	check-output
+	systemctl stop mongod &> $logfile
+	check-output
         umount /media
 	check-output
 fi
